@@ -5,3 +5,5 @@ Feature 2
 
 
 issue 1 - resolved
+
+issue 2 - resolved
