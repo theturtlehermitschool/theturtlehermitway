@@ -27,8 +27,8 @@ jobs:
           # Define the target dates (YYYYMMDD)
           TARGET_DATES=("20250211" "20250218" "20250225" "20250318" "20250415" "20250422" "20250513" "20250527" "20250610" "20250624" "20250708" "20250722" "20250805" "20250819" "20250916" "20250923" "20251014" "20251028" "20251111" "20251118" "20251216")
 
-          # Get current date
-          CURRENT_DATE=$(date -u +'%Y%m%d')
+          # Get current date in IST
+          CURRENT_DATE=$(TZ='Asia/Kolkata' date +'%Y%m%d')
           echo "Current date is: ${CURRENT_DATE}"
           
           # Check if current date has any rapid release tags
