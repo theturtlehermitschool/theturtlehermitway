@@ -29,6 +29,7 @@ jobs:
 
           # Get current date
           CURRENT_DATE=$(date -u +'%Y%m%d')
+          echo "Current date is: ${CURRENT_DATE}"
           
           # Check if current date has any rapid release tags
           RR_TAGS=$(git tag -l "rr-${CURRENT_DATE}-v*")
