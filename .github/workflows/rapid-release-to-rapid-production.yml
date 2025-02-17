@@ -1,0 +1,63 @@
+name: Rapid Release To Rapid Production
+
+on:
+  schedule:
+    # Runs every Monday at 08:00 AM UTC (13:30 PM IST)
+    - cron: '0 8 * * 1'
+  
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  create-production-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all tags and branches
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Process Tags and Create Production Tag
+        run: |
+          # Define the target dates (YYYYMMDD)
+          TARGET_DATES=("20250211" "20250218" "20250225" "20250318" "20250415" "20250422" "20250513" "20250527" "20250610" "20250624" "20250708" "20250722" "20250805" "20250819" "20250916" "20250923" "20251014" "20251028" "20251111" "20251118" "20251216")
+
+          # Get current date
+          CURRENT_DATE=$(date -u +'%Y%m%d')
+          
+          # Check if current date has any rapid release tags
+          RR_TAGS=$(git tag -l "rr-${CURRENT_DATE}-v*")
+          
+          if [ -z "$RR_TAGS" ]; then
+            echo "No rapid release tags found for date ${CURRENT_DATE}"
+            exit 0
+          fi
+          
+          # Get the latest version for current date
+          LATEST_VERSION=$(echo "$RR_TAGS" | sort -V | tail -n 1)
+          
+          if [ -z "$LATEST_VERSION" ]; then
+            echo "No version tags found for date ${CURRENT_DATE}"
+            exit 0
+          fi
+          
+          # Find which branch has the latest version tag
+          SOURCE_BRANCH=$(git branch -r --contains $LATEST_VERSION | head -n 1 | tr -d ' *')
+          
+          # Create new production tag name
+          NEW_PROD_TAG="rp-${CURRENT_DATE}-v1.0"
+          
+          # Checkout the source branch
+          git checkout ${SOURCE_BRANCH#*/}
+          git pull origin ${SOURCE_BRANCH#*/}
+          
+          # Create and push new production tag
+          git tag -a $NEW_PROD_TAG -m "Production tag created from ${LATEST_VERSION}"
+          git push origin $NEW_PROD_TAG
+          
+          echo "Created production tag ${NEW_PROD_TAG} from ${LATEST_VERSION} on branch ${SOURCE_BRANCH}" 
